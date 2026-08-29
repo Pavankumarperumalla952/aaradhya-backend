@@ -1,13 +1,11 @@
 const express = require("express");
-const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 
 app.use(express.json());
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.get("/", (req, res) => {
   res.json({
@@ -25,17 +23,19 @@ app.post("/chat", async (req, res) => {
       });
     }
 
-    const response = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: message
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash"
     });
 
+    const result = await model.generateContent(message);
+    const reply = result.response.text();
+
     res.json({
-      reply: response.output_text
+      reply: reply
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("Gemini error:", error);
 
     res.status(500).json({
       error: "Something went wrong"
