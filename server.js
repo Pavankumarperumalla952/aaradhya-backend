@@ -32,7 +32,7 @@ app.post("/chat", async (req, res) => {
     console.log("User message:", message);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash"
+     model: "gemini-3.5-flash"
     });
 
     const prompt = `
