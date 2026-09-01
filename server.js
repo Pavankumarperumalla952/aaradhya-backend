@@ -9,51 +9,56 @@ const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY
 );
 
+// Test backend
 app.get("/", (req, res) => {
   res.json({
     status: "Aaradhya backend is running"
   });
 });
 
+// Chat API
 app.post("/chat", async (req, res) => {
 
   try {
 
     const message = req.body.message;
 
-    if (!message) {
+    if (!message || !message.trim()) {
       return res.status(400).json({
         error: "Message is required"
       });
     }
 
-    const model =
-      genAI.getGenerativeModel({
-        model: "gemini-3.5-flash"
-      });
+    console.log("User message:", message);
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash"
+    });
 
     const prompt = `
 You are Aaradhya, a friendly female AI companion.
 
-The user is speaking Telugu.
+Your main goal is to understand the user's COMPLETE message correctly.
 
-Always reply in natural, fluent, conversational Telugu.
+Do not guess what the user means.
 
-Use clear and pleasant Indian Telugu.
+If the user asks about Boeing and Airbus,
+answer about Boeing and Airbus.
 
-Your Telugu should sound natural when spoken aloud by a Telugu text-to-speech voice.
+If the user asks about a movie,
+answer about that movie.
 
-Do not use an English accent style.
+Do not change the topic.
 
-Do not unnecessarily translate Telugu into English.
+If the user speaks Telugu, reply in natural conversational Telugu.
 
-Avoid robotic, bookish, or unnatural Telugu.
+Use simple, clear Telugu that sounds natural when spoken aloud.
 
-Use simple everyday Telugu that a Telugu-speaking person would naturally understand.
+Do not unnecessarily use English words.
 
-If the user asks a question in English, you may answer in English.
+If the user asks in English, answer in English.
 
-If the user speaks Telugu, answer in Telugu.
+Keep answers reasonably short unless the user asks for detailed information.
 
 User message:
 ${message}
@@ -65,19 +70,19 @@ ${message}
     const reply =
       result.response.text();
 
-    res.json({
+    console.log("AI reply:", reply);
+
+    return res.status(200).json({
       reply: reply
     });
 
   } catch (error) {
 
-    console.error(
-      "Gemini error:",
-      error
-    );
+    console.error("Gemini error:", error);
 
-    res.status(500).json({
-      error: "Something went wrong"
+    return res.status(500).json({
+      error: "Gemini request failed",
+      details: error.message
     });
   }
 });
